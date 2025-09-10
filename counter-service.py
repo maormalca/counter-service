@@ -6,12 +6,11 @@ app = Flask(__name__)
 post_counter = 0
 get_counter = 0
 
-# ברוט "/" נחזיר רק סטטוס קוד 200
+
 @app.route('/', methods=["POST", "GET"])
 def root():
     return Response(status=200)
-
-# ברוט "/count" נבצע את הספירה
+#Add post request
 @app.route('/count', methods=["POST", "GET"])
 def count():
     global post_counter, get_counter
