@@ -11,6 +11,7 @@ env:
   IMAGE_NAME: "counter-service"
   IMAGE_TAG: "latest"
   KUBE_CONFIG_PATH: "$HOME/.kube/config"
+  CLUSTER_NAME: "counter-eks-cluster"
 
 jobs:
   build-and-push:
@@ -50,11 +51,11 @@ jobs:
         with:
           version: 'latest'
 
-      - name: Configure kubeconfig
+      - name: Update kubeconfig from EKS
         run: |
-          mkdir -p $(dirname "$KUBE_CONFIG_PATH")
-          echo "${{ secrets.KUBE_CONFIG }}" > $KUBE_CONFIG_PATH
+          aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
 
       - name: Deploy to EKS
         run: |
-          kubectl apply -f k8s/
+          kubectl get namespace prod || kubectl create namespace prod
+          kubectl apply -f k8s-files/ -n prod
