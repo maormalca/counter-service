@@ -66,3 +66,25 @@ jobs:
         run: |
           kubectl get namespace prod || kubectl create namespace prod
           kubectl apply -f k8s-files/ -n prod
+      
+      - name: Wait for Ingress to be ready
+        run: |
+          echo "⏳ Waiting 2 minutes for Ingress to stabilize..."
+          sleep 120
+
+      - name: Get Ingress Address
+        id: ingress
+        run: |
+          INGRESS_ADDRESS=$(kubectl get ingress counter-app-ingress -n prod -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          echo "Ingress address: http://$INGRESS_ADDRESS/count"
+          echo "INGRESS_ADDRESS=$INGRESS_ADDRESS" >> $GITHUB_ENV
+
+      - name: Test GET request to /count
+        run: |
+          echo "🔍 Sending GET request to /count"
+          curl -X GET http://$INGRESS_ADDRESS/count
+
+      - name: Test POST request to /count
+        run: |
+          echo "📤 Sending POST request to /count"
+          curl -X POST http://$INGRESS_ADDRESS/count
